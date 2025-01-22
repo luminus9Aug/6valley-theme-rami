@@ -9139,4 +9139,5 @@ return [
 	"Online" => "Online",
 	"terms" => "Terms",
 	"Order_Placed_&_Account_Created_Successfully" => "Order Placed & Account Created Successfully",
+	"Order Created" => "Order Created",
 ];

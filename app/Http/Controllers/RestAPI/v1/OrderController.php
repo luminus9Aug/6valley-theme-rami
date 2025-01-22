@@ -65,8 +65,13 @@ class OrderController extends Controller
                 'order_status' => 'canceled'
             ]);
 
+            echo 'Order canceled successfully 1.2=>>' . $order;
+            exit;
+
             return response()->json(translate('order_canceled_successfully'), 200);
         }
+        echo 'Order canceled successfully 1.3=>>' . $order;
+        exit;
 
         return response()->json(['message' => translate('status_not_changeable_now')], 403);
     }
@@ -75,6 +80,8 @@ class OrderController extends Controller
     {
         $user = Helpers::getCustomerInformation($request);
         $newCustomerRegister = null;
+
+
         $cartGroupIds = CartManager::get_cart_group_ids(request: $request, type: 'checked');
         $carts = Cart::whereHas('product', function ($query) {
             return $query->active();
@@ -171,9 +178,15 @@ class OrderController extends Controller
                 ->update(['customer_id' => $newCustomerRegister['id'], 'is_guest' => 0]);
         }
 
+        echo json_encode([
+            'order_ids' => $orderIds,
+            'new_user' => (bool) $newCustomerRegister
+        ]);
+        exit;
+
         return response()->json([
             'order_ids' => $orderIds,
-            'new_user' => (bool)$newCustomerRegister
+            'new_user' => (bool) $newCustomerRegister
         ], 200);
     }
 
@@ -262,7 +275,7 @@ class OrderController extends Controller
 
         if (isset($method)) {
             $fields = array_column($method->method_informations, 'customer_input');
-            $values = (array)json_decode(base64_decode($request['method_informations']));
+            $values = (array) json_decode(base64_decode($request['method_informations']));
 
             $offline_payment_info['method_id'] = $request['method_id'];
             $offline_payment_info['method_name'] = $method->method_name;
@@ -308,7 +321,7 @@ class OrderController extends Controller
 
         return response()->json([
             'messages' => translate('order_placed_successfully'),
-            'new_user' => (bool)$newCustomerRegister,
+            'new_user' => (bool) $newCustomerRegister,
         ], 200);
     }
 
@@ -548,7 +561,8 @@ class OrderController extends Controller
                     'status' => 0,
                     'message' => translate('Payment_must_be_confirmed_first') . ' !!',
                 ]);
-            };
+            }
+            ;
 
             if ($order_details_data->order->is_guest) {
                 $customer_email = $order_details_data->order->shipping_address_data ? $order_details_data->order->shipping_address_data->email : ($order_details_data->order->billing_address_data ? $order_details_data->order->billing_address_data->email : '');
@@ -821,8 +835,7 @@ class OrderController extends Controller
         } elseif ($add_to_cart_count > 0) {
             return response()->json(['message' => $add_to_cart_count . ' item added to cart successfully!'], 200);
 
-        }
-        {
+        } {
             return response()->json(['message' => 'All items were not added to cart as they are currently unavailable for purchase'], 403);
         }
     }

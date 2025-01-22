@@ -1,5 +1,5 @@
 <?php
-
+// app/Events/OrderCreatedEvent.php
 namespace App\Events;
 
 use App\Models\Order;

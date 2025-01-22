@@ -38,9 +38,12 @@ class OrderManager
 
     public static function track_order($order_id)
     {
-        $order = Order::with(['deliveryMan', 'orderStatusHistory' => function ($query) {
-            return $query->latest();
-        }])->where(['id' => $order_id])->first();
+        $order = Order::with([
+            'deliveryMan',
+            'orderStatusHistory' => function ($query) {
+                return $query->latest();
+            }
+        ])->where(['id' => $order_id])->first();
         return $order;
     }
 
@@ -512,7 +515,7 @@ class OrderManager
         $order_note = $req['order_note'] ?? session('order_note');
 
         $cart_group_id = $data['cart_group_id'];
-        $admin_commission = (float)str_replace(",", "", Helpers::sales_commission_before_order($cart_group_id, $discount));
+        $admin_commission = (float) str_replace(",", "", Helpers::sales_commission_before_order($cart_group_id, $discount));
 
         $is_shipping_free = 0;
         $freeShippingDiscount = 0;
@@ -606,9 +609,12 @@ class OrderManager
         self::add_order_status_history($order_id, $getCustomerID, $data['payment_status'] == 'paid' ? 'confirmed' : 'pending', 'customer');
 
         foreach (CartManager::getCartListQuery(groupId: $data['cart_group_id'], type: 'checked') as $cartSingleItem) {
-            $product = Product::where(['id' => $cartSingleItem['product_id']])->with(['digitalVariation', 'clearanceSale' => function ($query) {
-                return $query->active();
-            }])->first()->toArray();
+            $product = Product::where(['id' => $cartSingleItem['product_id']])->with([
+                'digitalVariation',
+                'clearanceSale' => function ($query) {
+                    return $query->active();
+                }
+            ])->first()->toArray();
             unset($product['is_shop_temporary_close']);
             unset($product['thumbnail_full_url']);
             unset($product['color_images_full_url']);
@@ -719,7 +725,7 @@ class OrderManager
             $seller = Seller::find($seller_data->seller_id);
             /**send message to seller  */
             if ($seller) {
-                $notification = (object)[
+                $notification = (object) [
                     'key' => 'new_order_message',
                     'type' => 'seller',
                     'order' => $order,
@@ -729,14 +735,14 @@ class OrderManager
         }
         if ($user != 'offline') {
             if ($order['payment_method'] != 'cash_on_delivery' && $order['payment_method'] != 'offline_payment') {
-                $notification = (object)[
+                $notification = (object) [
                     'key' => 'confirmed',
                     'type' => 'customer',
                     'order' => $order,
                 ];
                 event(new OrderPlacedEvent(notification: $notification));
             } else {
-                $notification = (object)[
+                $notification = (object) [
                     'key' => 'pending',
                     'type' => 'customer',
                     'order' => $order,
@@ -746,6 +752,9 @@ class OrderManager
         }
 
         try {
+
+           
+
             $emailServices_smtp = getWebConfig(name: 'mail_config');
             if ($emailServices_smtp['status'] == 0) {
                 $emailServices_smtp = getWebConfig(name: 'mail_config_sendgrid');
@@ -834,7 +843,7 @@ class OrderManager
         $discount = $couponProcess['discount'];
         $order_note = session()->has('order_note') ? session('order_note') : null;
         $cart_group_id = $data['cart_group_id'];
-        $admin_commission = (float)str_replace(",", "", Helpers::sales_commission_before_order($cart_group_id, $discount));
+        $admin_commission = (float) str_replace(",", "", Helpers::sales_commission_before_order($cart_group_id, $discount));
         $user = Helpers::getCustomerInformation($req);
         $seller_data = Cart::where(['cart_group_id' => $cart_group_id])->first();
         $shipping_method = CartShipping::where(['cart_group_id' => $cart_group_id])->first();
@@ -1111,7 +1120,8 @@ class OrderManager
                     $cartCheck = Cart::where([
                         'customer_id' => $user->id,
                         'seller_id' => ($product->added_by == 'admin') ? 1 : $product->user_id,
-                        'seller_is' => $product->added_by])->first();
+                        'seller_is' => $product->added_by
+                    ])->first();
 
                     if (isset($cartCheck)) {
                         $cartGroupId = $cartCheck['cart_group_id'];
@@ -1239,9 +1249,12 @@ class OrderManager
         if ($minimumOrderAmountStatus) {
             $query = Cart::whereHas('product', function ($query) {
                 return $query->active();
-            })->with(['seller', 'allProducts' => function ($query) {
-                return $query->active();
-            }])
+            })->with([
+                        'seller',
+                        'allProducts' => function ($query) {
+                            return $query->active();
+                        }
+                    ])
                 ->where([
                     'customer_id' => ($user == 'offline' ? (session('guest_id') ?? $request->guest_id) : $user->id),
                     'is_guest' => ($user == 'offline' ? 1 : '0'),
@@ -1338,9 +1351,9 @@ class OrderManager
         ];
 
         $freeDeliveryData['status'] = (int) (getWebConfig(name: 'free_delivery_status') ?? 0);
-        $freeDeliveryData['responsibility'] = (string)getWebConfig(name: 'free_delivery_responsibility');
-        $freeDeliveryOverAmount = (float)getWebConfig(name: 'free_delivery_over_amount');
-        $freeDeliveryOverAmountSeller = (float)getWebConfig(name: 'free_delivery_over_amount_seller');
+        $freeDeliveryData['responsibility'] = (string) getWebConfig(name: 'free_delivery_responsibility');
+        $freeDeliveryOverAmount = (float) getWebConfig(name: 'free_delivery_over_amount');
+        $freeDeliveryOverAmountSeller = (float) getWebConfig(name: 'free_delivery_over_amount_seller');
 
         if ($freeDeliveryData['status'] && $cart_group_id) {
             $getCartList = Cart::whereHas('product', function ($query) {

@@ -4,6 +4,7 @@
 @section('content')
     <div class="content container-fluid">
         <div>
+            
             <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
                 <h2 class="h1 mb-0">
                     <img src="{{dynamicAsset(path: 'public/assets/back-end/img/all-orders.png')}}" class="mb-1 mr-1" alt="">

@@ -1,8 +1,12 @@
 <?php
-
+// app/Listeners/OrderCreatedListener.php
 namespace App\Listeners;
 
 use App\Events\OrderCreatedEvent;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Mail;
 
 class OrderCreatedListener
 {
@@ -11,11 +15,10 @@ class OrderCreatedListener
         $order = $event->order;
         $customer = $order->customer;
 
-        // Access order and customer details
-        $customerName = "{$customer->f_name} {$customer->l_name}";
-        $customerMobile = $customer->mobile;
-        $customerAddress = $customer->address;
+        // Generate QR code
+        $qrCode = QrCode::format('png')->size(200)->generate("Order ID: {$order->id}, Customer: {$customer->name}");
 
-        // Your logic here
+        // Send notification (example using Mail)
+        Mail::to($customer->email)->send(new \App\Mail\OrderCreated($order, $qrCode));
     }
 }

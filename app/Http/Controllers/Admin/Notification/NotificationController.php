@@ -30,9 +30,8 @@ class NotificationController extends BaseController
      */
     public function __construct(
         private readonly NotificationRepositoryInterface $notificationRepo,
-        private readonly NotificationService             $notificationService,
-    )
-    {
+        private readonly NotificationService $notificationService,
+    ) {
 
     }
 
@@ -73,6 +72,9 @@ class NotificationController extends BaseController
             return back();
         }
 
+        echo 'test getNotificationAddData =>>>>> ';
+        exit;
+
         $notification = $this->notificationRepo->add(data: $this->notificationService->getNotificationAddData(request: $request));
         try {
             $this->sendPushNotificationToTopic($notification);
@@ -102,9 +104,11 @@ class NotificationController extends BaseController
     public function update(NotificationRequest $request, string|int $id): RedirectResponse
     {
         $notification = $this->notificationRepo->getFirstWhere(params: ['id' => $id]);
-        $this->notificationRepo->update(id: $notification['id'],
+        $this->notificationRepo->update(
+            id: $notification['id'],
             data: $this->notificationService->getNotificationUpdateData(
-                request: $request, notificationImage: $notification['image']
+                request: $request,
+                notificationImage: $notification['image']
             )
         );
         Toastr::success(translate('notification_updated_successfully'));

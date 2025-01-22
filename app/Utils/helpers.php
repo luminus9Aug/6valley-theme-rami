@@ -22,6 +22,7 @@ use App\Utils\CartManager;
 use App\Utils\OrderManager;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 
@@ -162,15 +163,15 @@ class Helpers
 
         $variation = [];
         $data['category_ids'] = is_array($data['category_ids']) ? $data['category_ids'] : json_decode($data['category_ids']);
-//        $data['images'] = is_array($data['images']) ? $data['images'] : json_decode($data['images']);
+        //        $data['images'] = is_array($data['images']) ? $data['images'] : json_decode($data['images']);
         $data['colors'] = $colors;
-//        $data['color_image'] = $color_image;
+        //        $data['color_image'] = $color_image;
         $data['colors_formatted'] = $color_final;
         $attributes = [];
         if ((is_array($data['attributes']) ? $data['attributes'] : json_decode($data['attributes'])) != null) {
             $attributes_arr = is_array($data['attributes']) ? $data['attributes'] : json_decode($data['attributes']);
             foreach ($attributes_arr as $attribute) {
-                $attributes[] = (integer)$attribute;
+                $attributes[] = (integer) $attribute;
             }
         }
         $data['attributes'] = $attributes;
@@ -179,9 +180,9 @@ class Helpers
         foreach ($variation_arr as $var) {
             $variation[] = [
                 'type' => $var['type'],
-                'price' => (double)$var['price'],
+                'price' => (double) $var['price'],
                 'sku' => $var['sku'],
-                'qty' => (integer)$var['qty'],
+                'qty' => (integer) $var['qty'],
             ];
         }
         $data['variation'] = $variation;
@@ -229,7 +230,7 @@ class Helpers
         if ((is_array($data['attributes']) ? $data['attributes'] : json_decode($data['attributes'])) != null) {
             $attributes_arr = is_array($data['attributes']) ? $data['attributes'] : json_decode($data['attributes']);
             foreach ($attributes_arr as $attribute) {
-                $attributes[] = (integer)$attribute;
+                $attributes[] = (integer) $attribute;
             }
         }
         $data['attributes'] = $attributes;
@@ -238,9 +239,9 @@ class Helpers
         foreach ($variation_arr as $var) {
             $variation[] = [
                 'type' => $var['type'],
-                'price' => (double)$var['price'],
+                'price' => (double) $var['price'],
                 'sku' => $var['sku'],
-                'qty' => (integer)$var['qty'],
+                'qty' => (integer) $var['qty'],
             ];
         }
         $data['variation'] = $variation;
@@ -260,7 +261,8 @@ class Helpers
                 }
                 $data = $storage;
             } else {
-                $data = Helpers::set_data_format($data);;
+                $data = Helpers::set_data_format($data);
+                ;
             }
 
             return $data;
@@ -280,7 +282,8 @@ class Helpers
                 }
                 $data = $storage;
             } else {
-                $data = Helpers::set_data_format_for_json_data($data);;
+                $data = Helpers::set_data_format_for_json_data($data);
+                ;
             }
 
             return $data;
@@ -296,8 +299,19 @@ class Helpers
     public static function getDefaultPaymentGateways(): array
     {
         return [
-            'ssl_commerz', 'paypal', 'stripe', 'razor_pay', 'paystack', 'senang_pay', 'paymob_accept',
-            'flutterwave', 'paytm', 'paytabs', 'liqpay', 'mercadopago', 'bkash'
+            'ssl_commerz',
+            'paypal',
+            'stripe',
+            'razor_pay',
+            'paystack',
+            'senang_pay',
+            'paymob_accept',
+            'flutterwave',
+            'paytm',
+            'paytabs',
+            'liqpay',
+            'mercadopago',
+            'bkash'
         ];
     }
 
@@ -398,7 +412,7 @@ class Helpers
     {
         return ($price / 100) * $tax;
 
-//        $discount = self::get_product_discount(product: $product, price: $price);
+        //        $discount = self::get_product_discount(product: $product, price: $price);
 //        return (($price-$discount) / 100) * $tax; //after discount decrease
     }
 
@@ -441,7 +455,7 @@ class Helpers
     {
         $user_role = auth('admin')->user()->role;
         $permission = $user_role->module_access;
-        if (isset($permission) && $user_role->status == 1 && in_array($mod_name, (array)json_decode($permission)) == true) {
+        if (isset($permission) && $user_role->status == 1 && in_array($mod_name, (array) json_decode($permission)) == true) {
             return true;
         }
 
@@ -520,9 +534,12 @@ class Helpers
                 'fund_added_by_admin_message' => 'fund_added_by_admin_message',
                 'delivery_man_charge' => 'delivery_man_charge',
             ];
-            $data = NotificationMessage::with(['translations' => function ($query) use ($lang) {
-                $query->where('locale', $lang);
-            }])->where(['key' => $notification_key[$key], 'user_type' => $user_type])->first() ?? ["status" => 0, "message" => "", "translations" => []];
+
+            $data = NotificationMessage::with([
+                'translations' => function ($query) use ($lang) {
+                    $query->where('locale', $lang);
+                }
+            ])->where(['key' => $notification_key[$key], 'user_type' => $user_type])->first() ?? ["status" => 0, "message" => "", "translations" => []];
             if ($data) {
                 if ($data['status'] == 0) {
                     return 0;
@@ -544,7 +561,8 @@ class Helpers
     {
         $key = BusinessSetting::where(['type' => 'push_notification_key'])->first()->value;
         $url = "https://fcm.googleapis.com/fcm/send";
-        $header = array("authorization: key=" . $key . "",
+        $header = array(
+            "authorization: key=" . $key . "",
             "content-type: application/json"
         );
 
@@ -629,7 +647,10 @@ class Helpers
             $objects = scandir($dir);
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
-                    if (filetype($dir . "/" . $object) == "dir") Helpers::remove_dir($dir . "/" . $object); else unlink($dir . "/" . $object);
+                    if (filetype($dir . "/" . $object) == "dir")
+                        Helpers::remove_dir($dir . "/" . $object);
+                    else
+                        unlink($dir . "/" . $object);
                 }
             }
             reset($objects);
@@ -808,6 +829,143 @@ class Helpers
         }
 
         return $bonuses->max('applied_bonus_amount') ?? 0;
+    }
+
+    public static function test_wati_notification()
+    {
+        try {
+            // Test order data
+            $test_data = [
+                'phone' => '+918078641994',
+                'templates' => [
+                    'new_order_store' => [
+                        'params' => [
+                            ['name' => '1', 'value' => 'John Doe'],       // Customer Name
+                            ['name' => '2', 'value' => '12345'],           // Order ID
+                            ['name' => '3', 'value' => 'Test Store'],      // Store Name
+                            ['name' => '4', 'value' => '100'],             // Order Amount
+                        ]
+                    ],
+                    'order_confirmed' => [
+                        'params' => [
+                            ['name' => '1', 'value' => 'John Doe'],       // Customer Name
+                            ['name' => '2', 'value' => '12345'],           // Order ID
+                            ['name' => '3', 'value' => 'Test Store'],      // Store Name
+                            ['name' => '4', 'value' => '100'],             // Order Amount
+                        ]
+                    ]
+                ]
+            ];
+
+            $Result = [];
+            foreach ($test_data['templates'] as $template => $data) {
+                $res = self::send_wati_notification(
+                    $test_data['phone'],
+                    $template,
+                    $data['params']
+                );
+                $Result = $res;
+            }
+            return $Result;
+
+        } catch (\Exception $e) {
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+
+    public static function send_wati_notification($phone, $template, $params)
+    {
+        try {
+            $config = self::get_wati_settings();
+            if (!isset($config['status']) || $config['status'] != 1) {
+                return false;
+            }
+
+            // Make API call
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+                CURLOPT_URL => $config['api_url'] . '/api/v1/sendTemplateMessage?whatsappNumber=' . $phone,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => json_encode([
+                    'template_name' => $template,
+                    'broadcast_name' => $template,
+                    'parameters' => $params
+                ]),
+                CURLOPT_HTTPHEADER => [
+                    'Authorization: Bearer ' . $config['api_key'],
+                    'Content-Type: application/json'
+                ],
+            ]);
+
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+            curl_close($curl);
+
+            if ($err) {
+                info('WATI Error:', ['error' => $err]);
+                return false;
+            }
+
+            $responseData = json_decode($response, true);
+
+            // Check only API success
+            return isset($responseData['result']) && $responseData['result'] === true;
+
+        } catch (\Exception $e) {
+            info('WATI Exception:', ['error' => $e->getMessage()]);
+            return false;
+        }
+    }
+
+    public static function get_wati_settings()
+    {
+        try {
+            $wati_settings = DB::table('addon_settings')
+                ->where('key_name', 'wati')
+                ->first();
+
+            if ($wati_settings) {
+                $live_values = json_decode($wati_settings->live_values, true);
+
+                return [
+                    'status' => $live_values['status'] ?? 0,
+                    'api_key' => $live_values['api_key'],
+                    'api_url' => $live_values['api_url'],
+                    'wati_number' => $live_values['wati_number'],
+                    'template_name' => $live_values['template_name'],
+                    'broadcast_name' => $live_values['broadcast_name'],
+                    'shop_name' => $live_values['shop_name']
+                ];
+            }
+
+
+            return [
+                'status' => 0,
+                'api_key' => env('WATI_API_KEY'),
+                'api_url' => env('WATI_API_URL'),
+                'wati_number' => env('WATI_NUMBER'),
+                'template_name' => env('WATI_TEMPLATE_NAME'),
+                'broadcast_name' => env('WATI_BROADCAST_NAME'),
+                'shop_name' => env('SHOP_NAME')
+            ];
+        } catch (\Exception $e) {
+            info(['WATI Settings Error:', $e->getMessage()]);
+            return [
+                'status' => 0,
+                'api_key' => '',
+                'api_url' => '',
+                'wati_number' => '',
+                'template_name' => '',
+                'broadcast_name' => '',
+                'shop_name' => ''
+            ];
+        }
     }
 }
 
